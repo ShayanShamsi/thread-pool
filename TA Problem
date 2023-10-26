@@ -1,0 +1,90 @@
+#include <pthread.h>
+#include <semaphore.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+#define NUM_STUDENTS 5
+#define NUM_CHAIRS 3
+
+pthread_mutex_t mutex;
+sem_t ta_sem, student_sem;
+int waiting_students = 0;
+int student_chairs[NUM_CHAIRS];
+int next_seat = 0;
+
+void *student(void *student_id);
+void *teaching_assistant(void *param);
+
+pthread_mutex_init(&mutex, NULL);
+sem_init(&ta_sem,0,0);
+
+sem_init(&student_sem, 0, 0);
+
+pthread_t students[NUM_STUDENTS];
+for (int i = 0; i < NUM_STUDENTS; i++){
+        int *student_id = malloc(sizeof(int));
+        *student_id = i;
+        pthread_create(&students[i], NULL, student, (void *)students_id);
+}
+
+
+phtread_t ta;
+pthread_create(&ta, NULL, teaching_assistant, NULL);
+
+
+void * student(void * student_id) {
+        int id = *((int *)student_id);
+        while (1) {
+                printf("Student %d is programming.\n", id);
+                sleep(rand() % 5);
+
+                pthread_mutex_lock(&mutex);
+                if (waiting_students < NUM_CHAIRS) {
+                        students_chair[next_seat] = id;
+                        next_seat = (next_seat + 1) % NUM_CHAIRS;
+                        waiting_students++;
+                        printf("Student %d is waiting in a chair.\n", id);
+                        pthread_mutex_unlock(&mutex);
+
+                        sem_post(&student_sem);
+                        sem_wait(&ta_sem);
+                } else {
+                        pthread_mutex_unlock(&mutex);
+                        printf("Student %d will come back later.\n", id);
+                 }
+        }
+        free(student_id);
+        pthread_exit(0);
+}
+
+void *teaching_assistant(void *param) {
+        while (1) {
+                sem_wait(&student_sem);
+                pthread_mutex_lock(&mutex);
+
+                if (waiting_students > 0) {
+                        int id = student_chairs[next_seat - waiting_students];
+                        waiting_students--;
+                        printf("TA is helping Student %d.\n", id);
+                        sem_post(&ta_sem);
+                        pthread_mutex_unlock(&mutex);
+
+                        sleep(rand() % 5);
+                } else {
+                        printf("TA is sleeping.\n");
+                        pthread_mutex_unlock(&mutex);
+
+                        sleep(rand() % 3);
+                  }
+        }
+}
+
+int main() {
+        for (int i = 0; i < NUM_STUDENTS; i++) {
+                pthread_join(student[i], NULL);
+        }
+        pthread_join(ta, NULL);
+
+        return 0;
+}
