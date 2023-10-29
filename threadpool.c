@@ -26,7 +26,14 @@ task;
 task worktodo;
 
 // the worker bee
-pthread_t bee;
+pthread_t *thread_array;
+pthread_mutex_t mutex;
+sem_t sem;
+
+int print_error(char *msg) {
+    fprintf(stderr, "%s\n", msg);
+    exit(2);
+}
 
 // insert a task into the queue
 // returns 0 if successful or 1 otherwise, 
@@ -72,7 +79,18 @@ int pool_submit(void (*somefunction)(void *p), void *p)
 // initialize the thread pool
 void pool_init(void)
 {
-    pthread_create(&bee,NULL,worker,NULL);
+    thread_array = malloc(NUMBER_OF_THREADS * sizeof(pthread_t));
+    if (!thread_array) print_error("ERROR: malloc failed");
+
+    pthread_mutex_init(&mutex, NULL);
+    sem_init(&sem, 0, 1);
+
+    int ret;
+    long t;
+    for (t = 0; t < NUMBER_OF_THREADS; t++) {
+        //ret = pthread_create(&thread_array[t], NULL, //function, //arguments);
+        if (ret) print_error("ERROR: pthread_create failed");
+    }
 }
 
 // shutdown the thread pool
