@@ -32,7 +32,7 @@ int main(int argc, char **argv)
         fprintf(stderr, "usage: %s <n>\n", argv[0]);
         fprintf(stderr, "where <n> is the number of tasks to execute.\n");
     }
-    int n = argv[1];
+    int n = atoi(argv[1]);
     if (n <= 0) print_error("ERROR: The number of tasks has to be positive.");
 
     // create some work to do
