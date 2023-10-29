@@ -23,7 +23,7 @@ typedef struct
 task;
 
 // the work queue
-struct task task_queue[QUEUE_SIZE];
+task task_queue[QUEUE_SIZE];
 int front = 0, rear = -1, size = 0;
 
 // the worker bee
@@ -57,14 +57,14 @@ int enqueue(task t)
 // remove a task from the queue
 task dequeue()
 {
-    struct task worktodo;
+    task worktodo;
     pthread_mutex_lock(&mutex);
     if (!(size == 0)) {
         worktodo = task_queue[front];
         front = (front + 1) % QUEUE_SIZE;
         size--;
     } else {
-        print_error("ERROR: Forbidden operation. Thread attempted to dequeue from empty queue!")
+        print_error("ERROR: Forbidden operation. Thread attempted to dequeue from empty queue!");
     }
     pthread_mutex_unlock(&mutex);
     return worktodo;
@@ -73,7 +73,7 @@ task dequeue()
 // the worker thread in the thread pool
 void *worker(void *param)
 {
-    struct task worktodo;
+    task worktodo;
     // execute the task
     while(TRUE) {
         sem_wait(&sem);
@@ -95,7 +95,7 @@ void execute(void (*somefunction)(void *p), void *p)
  */
 int pool_submit(void (*somefunction)(void *p), void *p)
 {
-    struct task worktodo;
+    task worktodo;
     int ret;
     worktodo.function = somefunction;
     worktodo.data = p;

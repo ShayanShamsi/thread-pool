@@ -13,11 +13,6 @@ struct data
     int b;
 };
 
-int print_error(char *msg) {
-    fprintf(stderr, "%s\n", msg);
-    exit(2);
-}
-
 void add(void *param)
 {
     struct data *temp;
