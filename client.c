@@ -3,52 +3,44 @@
  */
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <unistd.h>
+#include <stdlib.h>
 #include "threadpool.h"
 
-struct data
-{
+struct data {
     int a;
     int b;
 };
 
-void add(void *param)
-{
+void add(void *param) {
     struct data *temp;
-    temp = (struct data*)param;
-
-    printf("I add two values %d and %d result = %d\n",temp->a, temp->b, temp->a + temp->b);
+    temp = (struct data *)param;
+    printf("I add two values %d and %d result = %d\n", temp->a, temp->b, temp->a + temp->b);
 }
 
-int main(int argc, char **argv)
-{
-    if (argc != 2) {
-        fprintf(stderr, "usage: %s <n>\n", argv[0]);
-        fprintf(stderr, "where <n> is the number of tasks to execute.\n");
-    }
-    int n = atoi(argv[1]);
-    if (n <= 0) print_error("ERROR: The number of tasks has to be positive.");
-
+int main(void) {
     // create some work to do
-    struct data *work = malloc(n * sizeof(struct data));
-
+    int n = 0;
+    while(n <= 0) {
+        printf("Please input the number of tasks: ");
+        scanf("%d", &n);
+    }
     // initialize the thread pool
     pool_init();
-
     // submit the work to the queue
-    for (int i = 0; i < n; i++) {
-        work[i].a = i;
-        work[i].b = -i;
-        while(pool_submit(&add,&work) != 0) ;
+    struct data *params = malloc(n * sizeof(struct data));
+    for(int i = 0; i != n; ++i) {
+        params[i].a = i;
+        params[i].b = -i;
+        while(pool_submit(&add, &params[i]) != 0) {
+            // printf("Oh no, the queue is full, sleep for a while.\n");
+            // sleep(1);
+            ;   // busy waiting is enough
+        }
     }
-
-    // may be helpful 
+    printf("All tasks have been submitted, wait for a while to exit.\n");
     sleep(3);
-
     pool_shutdown();
-
-    free(work);
-
+    free(params);
     return 0;
 }
